@@ -14,17 +14,16 @@ export function ThemeToggle() {
           variant="outline"
           size="icon"
           onClick={toggleTheme}
+          className="relative transition-all duration-200 hover:scale-105"
           aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
         >
-          {theme === "light" ? (
-            <Moon className="h-4 w-4" />
-          ) : (
-            <Sun className="h-4 w-4" />
-          )}
+          <Sun className={`h-4 w-4 transition-opacity ${theme === 'light' ? 'opacity-100' : 'opacity-0 absolute'}`} />
+          <Moon className={`h-4 w-4 transition-opacity ${theme === 'dark' ? 'opacity-100' : 'opacity-0 absolute'}`} />
+          <span className="sr-only">Toggle theme</span>
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{theme === "light" ? "Dark" : "Light"} mode</p>
+        <p>Switch to {theme === "light" ? "dark" : "light"} mode</p>
       </TooltipContent>
     </Tooltip>
   );
