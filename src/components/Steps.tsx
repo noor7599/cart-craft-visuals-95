@@ -6,6 +6,9 @@ export interface StepsProps {
   currentStep?: number;
   steps?: string[];
   children?: ReactNode;
+  aria?: {
+    label?: string;
+  };
 }
 
 export interface StepProps {
@@ -13,26 +16,31 @@ export interface StepProps {
   title: string;
   description?: string;
   status?: "upcoming" | "current" | "complete";
+  aria?: {
+    label?: string;
+  };
 }
 
-export const Step = ({ icon, title, description, status = "upcoming" }: StepProps) => {
+export const Step = ({ icon, title, description, status = "upcoming", aria }: StepProps) => {
   const isActive = status === "current";
   const isCompleted = status === "complete";
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      <div className="flex items-center">
+      <div className="flex items-center w-full">
         <div
           className={cn(
-            "h-8 w-8 rounded-full border-2 border-primary flex items-center justify-center",
+            "h-8 w-8 rounded-full border-2 border-primary flex items-center justify-center transition-all",
             {
               "bg-primary text-primary-foreground": isActive || isCompleted,
               "text-primary": !isActive && !isCompleted,
             }
           )}
+          role="img"
+          aria-label={aria?.label || `Step ${title} ${status}`}
         >
           {isCompleted ? (
-            <Check className="h-5 w-5" />
+            <Check className="h-5 w-5 animate-fade-in" />
           ) : icon ? (
             icon
           ) : (
@@ -41,7 +49,7 @@ export const Step = ({ icon, title, description, status = "upcoming" }: StepProp
         </div>
         
         <div
-          className={cn("h-1 w-full bg-muted", {
+          className={cn("h-1 w-full bg-muted transition-colors", {
             "bg-primary": isCompleted,
           })}
         />
@@ -64,15 +72,27 @@ export const Step = ({ icon, title, description, status = "upcoming" }: StepProp
   );
 };
 
-export const Steps = ({ currentStep, steps, children }: StepsProps) => {
+export const Steps = ({ currentStep, steps, children, aria }: StepsProps) => {
   // If we have children, render those directly
   if (children) {
-    return <div className="flex w-full justify-between">{children}</div>;
+    return (
+      <div 
+        className="flex w-full justify-between"
+        role="navigation" 
+        aria-label={aria?.label || "Process steps"}
+      >
+        {children}
+      </div>
+    );
   }
 
   // Otherwise use the traditional numbered steps implementation
   return (
-    <div className="flex w-full justify-between">
+    <div 
+      className="flex w-full justify-between"
+      role="navigation" 
+      aria-label={aria?.label || "Process steps"}
+    >
       {steps?.map((step, index) => {
         const isActive = currentStep === index;
         const isCompleted = currentStep! > index;
@@ -88,18 +108,21 @@ export const Steps = ({ currentStep, steps, children }: StepsProps) => {
               }
             )}
           >
-            <div className="flex items-center">
+            <div className="flex items-center w-full">
               <div
                 className={cn(
-                  "h-8 w-8 rounded-full border-2 border-primary flex items-center justify-center",
+                  "h-8 w-8 rounded-full border-2 border-primary flex items-center justify-center transition-all",
                   {
                     "bg-primary text-primary-foreground": isActive || isCompleted,
                     "text-primary": !isActive && !isCompleted,
                   }
                 )}
+                aria-label={`Step ${index + 1}: ${step}`}
+                aria-current={isActive ? "step" : undefined}
+                role="status"
               >
                 {isCompleted ? (
-                  <Check className="h-5 w-5" />
+                  <Check className="h-5 w-5 animate-fade-in" />
                 ) : (
                   <span>{index + 1}</span>
                 )}
@@ -107,7 +130,7 @@ export const Steps = ({ currentStep, steps, children }: StepsProps) => {
               
               {!isLastStep && (
                 <div
-                  className={cn("h-1 w-full bg-muted", {
+                  className={cn("h-1 w-full bg-muted transition-colors", {
                     "bg-primary": isCompleted,
                   })}
                 />

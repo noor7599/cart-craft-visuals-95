@@ -17,6 +17,7 @@ import {
   Steps,
   Step
 } from "@/components/Steps";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OrderItem {
   id: string;
@@ -66,8 +67,27 @@ const OrderDetails = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex h-40 items-center justify-center">
-          <p>Loading order details...</p>
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-8">
+            <Skeleton className="h-10 w-36" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-40" />
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div className="flex justify-between w-full">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col items-center">
+                    <Skeleton className="h-8 w-8 rounded-full mb-2" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                ))}
+              </div>
+              <Skeleton className="h-64 w-full" />
+            </CardContent>
+          </Card>
         </div>
       </Layout>
     );
@@ -79,7 +99,9 @@ const OrderDetails = () => {
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="mb-4 text-3xl font-bold">Order Not Found</h1>
           <p className="mb-8">We couldn't find the order you're looking for.</p>
-          <Button onClick={() => navigate("/orders")}>View All Orders</Button>
+          <Button onClick={() => navigate("/orders")} aria-label="Go back to all orders">
+            View All Orders
+          </Button>
         </div>
       </Layout>
     );
@@ -110,52 +132,64 @@ const OrderDetails = () => {
     <Layout>
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
-          <Button variant="outline" onClick={() => navigate("/orders")}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/orders")}
+            aria-label="Go back to all orders"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Orders
           </Button>
         </div>
         
-        <Card className="mb-8">
+        <Card className="mb-8 shadow-sm transition-all hover:shadow-md">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl">Order #{order.id}</CardTitle>
                 <CardDescription>Placed on {formattedDate}</CardDescription>
               </div>
-              <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+              <div 
+                className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary"
+                role="status"
+              >
                 {order.status}
               </div>
             </div>
           </CardHeader>
           
           <CardContent className="space-y-8">
-            <Steps>
-              <Step 
-                icon={<Package />} 
-                title="Order Processing" 
-                description="Your order has been received and is being processed"
-                status={getStepStatus("Processing")}
-              />
-              <Step 
-                icon={<Truck />} 
-                title="Order Shipped" 
-                description="Your order has been shipped and is on its way"
-                status={getStepStatus("Shipped")}
-              />
-              <Step 
-                icon={<Check />} 
-                title="Order Delivered" 
-                description="Your order has been delivered"
-                status={getStepStatus("Delivered")}
-              />
-            </Steps>
+            <div className="p-4 bg-secondary/20 rounded-md">
+              <Steps aria={{ label: "Order progress" }}>
+                <Step 
+                  icon={<Package />} 
+                  title="Order Processing" 
+                  description="Your order has been received and is being processed"
+                  status={getStepStatus("Processing")}
+                  aria={{ label: "Processing step, completed" }}
+                />
+                <Step 
+                  icon={<Truck />} 
+                  title="Order Shipped" 
+                  description="Your order has been shipped and is on its way"
+                  status={getStepStatus("Shipped")}
+                  aria={{ label: `Shipping step, ${getStepStatus("Shipped")}` }}
+                />
+                <Step 
+                  icon={<Check />} 
+                  title="Order Delivered" 
+                  description="Your order has been delivered"
+                  status={getStepStatus("Delivered")}
+                  aria={{ label: `Delivery step, ${getStepStatus("Delivered")}` }}
+                />
+              </Steps>
+            </div>
 
             <div>
               <h3 className="mb-4 text-lg font-semibold">Order Items</h3>
               <div className="space-y-4">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between">
+                  <div key={item.id} className="flex items-center justify-between p-3 rounded-md hover:bg-secondary/10 transition-colors">
                     <div className="flex items-center">
                       <div className="h-16 w-16 overflow-hidden rounded">
                         <img
