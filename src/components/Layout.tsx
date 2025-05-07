@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { AuthButtons } from "@/components/AuthButtons";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -94,6 +94,7 @@ export const Layout = ({ children }: LayoutProps) => {
               </form>
             )}
             
+            <ThemeToggle />
             <NotificationCenter />
             <CartDrawer />
             <AuthButtons />
