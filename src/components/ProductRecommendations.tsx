@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { Product, products } from "@/data/products";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ProductRecommendationsProps {
   currentProductId?: string;
@@ -15,10 +16,11 @@ export const ProductRecommendations = ({
   currentProductId,
   category,
   limit = 4,
-  title = "You May Also Like"
+  title
 }: ProductRecommendationsProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Simulate API call for recommendations
@@ -82,7 +84,7 @@ export const ProductRecommendations = ({
 
   return (
     <div className="py-8">
-      <h2 className="text-2xl font-bold mb-6">{title}</h2>
+      <h2 className="text-2xl font-bold mb-6">{title || t('productRecommendations')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {recommendations.map((product) => (
           <ProductCard key={product.id} product={product} />

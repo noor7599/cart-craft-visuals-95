@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import Index from "./pages/Index";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
@@ -67,29 +69,33 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/orders/:orderId" element={<OrderDetails />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                {/* Skip to main content link for keyboard accessibility */}
-                <div className="skip-to-content">
-                  <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:p-3 focus:bg-background focus:text-foreground focus:z-50">
-                    Skip to main content
-                  </a>
-                </div>
-              </BrowserRouter>
-            </CartProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/orders" element={<Orders />} />
+                      <Route path="/orders/:orderId" element={<OrderDetails />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                    {/* Skip to main content link for keyboard accessibility */}
+                    <div className="skip-to-content">
+                      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:p-3 focus:bg-background focus:text-foreground focus:z-50">
+                        Skip to main content
+                      </a>
+                    </div>
+                  </BrowserRouter>
+                </WishlistProvider>
+              </CartProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

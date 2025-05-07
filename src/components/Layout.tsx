@@ -1,7 +1,8 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Button } from "@/components/ui/button";
-import { Home, Package, Search, Menu, X } from "lucide-react";
+import { Home, Package, Search, Menu, X, Mic } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthButtons } from "@/components/AuthButtons";
@@ -9,6 +10,10 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { WishlistDrawer } from "@/components/WishlistDrawer";
+import { VoiceSearch } from "@/components/VoiceSearch";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,7 +24,9 @@ export const Layout = ({ children }: LayoutProps) => {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, user } = useAuth();
+  const { t, rtl } = useLanguage();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -54,6 +61,12 @@ export const Layout = ({ children }: LayoutProps) => {
     return `${greeting}, ${user.name.split(' ')[0]}`;
   };
 
+  // Handle voice search results
+  const handleVoiceResult = (transcript: string) => {
+    setSearchQuery(transcript);
+    // Here you can also trigger a search action
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header 
@@ -72,30 +85,35 @@ export const Layout = ({ children }: LayoutProps) => {
               asChild
               variant={isActive("/") ? "default" : "ghost"}
             >
-              <Link to="/">Home</Link>
+              <Link to="/">{t("home")}</Link>
             </Button>
             <Button
               asChild
               variant={isActive("/orders") ? "default" : "ghost"}
             >
-              <Link to="/orders">My Orders</Link>
+              <Link to="/orders">{t("orders")}</Link>
             </Button>
           </nav>
 
           <div className="flex items-center space-x-3">
             {!isMobile && (
-              <form className="relative hidden md:block mr-2" onSubmit={(e) => e.preventDefault()}>
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <form className="relative hidden md:flex items-center mr-2" onSubmit={(e) => e.preventDefault()}>
+                <Search className={`absolute ${rtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
                 <input
                   type="search"
-                  placeholder="Search..."
-                  className="w-[180px] bg-background border-border rounded-full border py-2 pl-8 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                  placeholder={t("searchPlaceholder")}
+                  className={`w-[180px] bg-background border-border rounded-full border py-2 ${rtl ? 'pr-8 pl-4' : 'pl-8 pr-4'} text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                <VoiceSearch onResult={handleVoiceResult} />
               </form>
             )}
             
+            <LanguageSwitcher />
             <ThemeToggle />
             <NotificationCenter />
+            <WishlistDrawer />
             <CartDrawer />
             <AuthButtons />
             
@@ -124,7 +142,7 @@ export const Layout = ({ children }: LayoutProps) => {
               >
                 <Link to="/" className="w-full">
                   <Home className="mr-2 h-4 w-4" />
-                  Home
+                  {t("home")}
                 </Link>
               </Button>
               <Button
@@ -134,10 +152,24 @@ export const Layout = ({ children }: LayoutProps) => {
               >
                 <Link to="/orders" className="w-full">
                   <Package className="mr-2 h-4 w-4" />
-                  My Orders
+                  {t("orders")}
                 </Link>
               </Button>
             </nav>
+            
+            <div className="mt-4">
+              <form className="relative flex items-center" onSubmit={(e) => e.preventDefault()}>
+                <Search className={`absolute ${rtl ? 'right-2.5' : 'left-2.5'} top-2.5 h-4 w-4 text-muted-foreground`} />
+                <input
+                  type="search"
+                  placeholder={t("searchPlaceholder")}
+                  className={`w-full bg-background border-border rounded-full border py-2 ${rtl ? 'pr-8 pl-4' : 'pl-8 pr-4'} text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <VoiceSearch onResult={handleVoiceResult} />
+              </form>
+            </div>
           </div>
         )}
       </header>
@@ -156,45 +188,45 @@ export const Layout = ({ children }: LayoutProps) => {
         <Breadcrumb />
       </div>
 
-      <main className="flex-1">
+      <main className="flex-1" id="main-content">
         {children}
       </main>
 
-      <footer className="border-t py-8 bg-gray-50">
+      <footer className="border-t py-8 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="font-bold mb-4">ShopEase</h3>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Shopping made simple and enjoyable with our curated collection of high-quality products.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Shop</h4>
+              <h4 className="font-semibold mb-4">{t("home")}</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/" className="text-gray-500 hover:text-primary">All Products</Link></li>
-                <li><Link to="/?category=Electronics" className="text-gray-500 hover:text-primary">Electronics</Link></li>
-                <li><Link to="/?category=Clothing" className="text-gray-500 hover:text-primary">Clothing</Link></li>
-                <li><Link to="/?category=Home" className="text-gray-500 hover:text-primary">Home</Link></li>
+                <li><Link to="/" className="text-gray-500 dark:text-gray-400 hover:text-primary">All Products</Link></li>
+                <li><Link to="/?category=Electronics" className="text-gray-500 dark:text-gray-400 hover:text-primary">Electronics</Link></li>
+                <li><Link to="/?category=Clothing" className="text-gray-500 dark:text-gray-400 hover:text-primary">Clothing</Link></li>
+                <li><Link to="/?category=Home" className="text-gray-500 dark:text-gray-400 hover:text-primary">Home</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Account</h4>
+              <h4 className="font-semibold mb-4">{t("myAccount")}</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/orders" className="text-gray-500 hover:text-primary">My Orders</Link></li>
-                <li><Link to="/checkout" className="text-gray-500 hover:text-primary">Checkout</Link></li>
+                <li><Link to="/orders" className="text-gray-500 dark:text-gray-400 hover:text-primary">{t("orders")}</Link></li>
+                <li><Link to="/checkout" className="text-gray-500 dark:text-gray-400 hover:text-primary">{t("checkout")}</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-500 hover:text-primary">Contact Us</a></li>
-                <li><a href="#" className="text-gray-500 hover:text-primary">FAQs</a></li>
-                <li><a href="#" className="text-gray-500 hover:text-primary">Shipping Information</a></li>
+                <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-primary">Contact Us</a></li>
+                <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-primary">FAQs</a></li>
+                <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-primary">Shipping Information</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t mt-8 pt-6 text-center text-sm text-gray-500">
+          <div className="border-t mt-8 pt-6 text-center text-sm text-gray-500 dark:text-gray-400">
             <p>&copy; {new Date().getFullYear()} ShopEase. All rights reserved.</p>
           </div>
         </div>

@@ -3,9 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Product } from "@/data/products";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart, Star, StarHalf } from "lucide-react";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { ShoppingCart, Star, StarHalf, Heart } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProductCardProps {
   product: Product;
@@ -13,7 +16,19 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { t } = useLanguage();
   const [isHovered, setIsHovered] = useState(false);
+
+  // Toggle wishlist status
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
 
   // Generate badge based on product properties
   const renderBadge = () => {
@@ -25,6 +40,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
     if (product.onSale) {
       return <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">On Sale</Badge>;
+    }
+    return null;
+  };
+
+  // Render inventory status indicator
+  const renderInventoryStatus = () => {
+    if (product.inventory && product.inventory < 5) {
+      return <Badge variant="outline" className="absolute top-2 right-2 bg-red-50 text-red-700 border-red-300">
+        {product.inventory === 1 ? "Last Item!" : `Only ${product.inventory} left!`}
+      </Badge>;
     }
     return null;
   };
@@ -63,6 +88,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     >
       <div className="aspect-square overflow-hidden relative">
         {renderBadge()}
+        {renderInventoryStatus()}
         <img
           src={product.image}
           alt={product.name}
@@ -70,17 +96,37 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         />
         {isHovered && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-200">
-            <Button 
-              onClick={(e) => {
-                e.stopPropagation();
-                addToCart(product);
-              }}
-              size="sm"
-              className="animate-fade-in"
-            >
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to cart
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(product);
+                }}
+                size="sm"
+                className="animate-fade-in"
+              >
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                {t("addToCart")}
+              </Button>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant={isInWishlist(product.id) ? "default" : "outline"}
+                    size="icon"
+                    className="animate-fade-in"
+                    onClick={toggleWishlist}
+                  >
+                    <Heart 
+                      className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-white' : ''}`} 
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
         )}
       </div>
@@ -109,7 +155,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           className="w-full transition-all duration-200 hover:bg-primary/90"
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to cart
+          {t("addToCart")}
         </Button>
       </CardFooter>
     </Card>
