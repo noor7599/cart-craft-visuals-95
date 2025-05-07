@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import {
   Steps,
-  Step,
+  Step
 } from "@/components/Steps";
 
 interface OrderItem {
