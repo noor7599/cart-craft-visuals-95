@@ -18,6 +18,7 @@ import {
   Step
 } from "@/components/Steps";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductRecommendations } from "@/components/ProductRecommendations";
 
 interface OrderItem {
   id: string;
@@ -25,6 +26,7 @@ interface OrderItem {
   price: number;
   quantity: number;
   image: string;
+  category?: string;
 }
 
 interface ShippingInfo {
@@ -126,6 +128,14 @@ const OrderDetails = () => {
       default:
         return "upcoming";
     }
+  };
+
+  // Get categories from ordered items for recommendations
+  const getOrderCategories = () => {
+    const categories = order.items
+      .map(item => item.category)
+      .filter(Boolean) as string[];
+    return categories.length > 0 ? categories[0] : undefined;
   };
 
   return (
@@ -250,6 +260,15 @@ const OrderDetails = () => {
             </p>
           </CardFooter>
         </Card>
+
+        {/* Product recommendations based on order history */}
+        <div className="mt-12 mb-8">
+          <ProductRecommendations 
+            category={getOrderCategories()}
+            title="Recommended For You"
+            limit={4}
+          />
+        </div>
       </div>
     </Layout>
   );

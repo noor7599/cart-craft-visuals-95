@@ -13,11 +13,16 @@ import { PromoSection } from "@/components/PromoSection";
 import { Newsletter } from "@/components/Newsletter";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { ProductRecommendations } from "@/components/ProductRecommendations";
+import { LoadingSpinner, SkeletonLoader } from "@/components/LoadingSpinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   // Extract category from URL query parameter if present
   useEffect(() => {
@@ -27,6 +32,15 @@ const Index = () => {
       setSelectedCategory(categoryParam);
     }
   }, [location.search]);
+
+  // Simulate loading state when filters change
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, searchQuery]);
 
   const filteredProducts = products
     .filter(product => !selectedCategory || product.category === selectedCategory)
@@ -78,7 +92,21 @@ const Index = () => {
             onSelectCategory={setSelectedCategory}
           />
           
-          <ProductGrid products={filteredProducts} />
+          {isLoading ? (
+            <SkeletonLoader count={6} />
+          ) : (
+            <ProductGrid products={filteredProducts} />
+          )}
+          
+          {/* Only show recommendations when there are search results or category filter */}
+          {(selectedCategory || searchQuery !== "") && filteredProducts.length > 0 && (
+            <div className="mt-16">
+              <ProductRecommendations 
+                category={selectedCategory || undefined}
+                title="You May Also Like"
+              />
+            </div>
+          )}
         </div>
       </section>
       

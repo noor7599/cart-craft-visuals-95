@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Home, Package, Search, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AuthButtons } from "@/components/AuthButtons";
+import { NotificationCenter } from "@/components/NotificationCenter";
+import { Breadcrumb } from "@/components/Breadcrumb";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +19,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -34,6 +39,20 @@ export const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  // Personalized greeting
+  const getGreeting = () => {
+    if (!isAuthenticated || !user) return "";
+    
+    const hour = new Date().getHours();
+    let greeting = "";
+    
+    if (hour < 12) greeting = "Good morning";
+    else if (hour < 18) greeting = "Good afternoon";
+    else greeting = "Good evening";
+    
+    return `${greeting}, ${user.name.split(' ')[0]}`;
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -63,9 +82,9 @@ export const Layout = ({ children }: LayoutProps) => {
             </Button>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {!isMobile && (
-              <form className="relative hidden md:block mr-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="relative hidden md:block mr-2" onSubmit={(e) => e.preventDefault()}>
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <input
                   type="search"
@@ -75,7 +94,9 @@ export const Layout = ({ children }: LayoutProps) => {
               </form>
             )}
             
+            <NotificationCenter />
             <CartDrawer />
+            <AuthButtons />
             
             <button
               className="md:hidden flex items-center justify-center"
@@ -119,6 +140,20 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         )}
       </header>
+
+      {/* User greeting when logged in - only on home page */}
+      {isAuthenticated && user && location.pathname === "/" && !isMenuOpen && (
+        <div className="bg-secondary/30 py-2">
+          <div className="container mx-auto px-4">
+            <p className="text-sm font-medium">{getGreeting()}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Breadcrumb navigation */}
+      <div className="container mx-auto px-4">
+        <Breadcrumb />
+      </div>
 
       <main className="flex-1">
         {children}
