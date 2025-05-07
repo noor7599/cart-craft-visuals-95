@@ -2,7 +2,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Button } from "@/components/ui/button";
-import { Home, Package } from "lucide-react";
+import { Home, Package, Search, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,16 +12,42 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
+  // Handle scrolling and update header appearance
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close menu when changing routes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
+      <header 
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+          isScrolled ? "bg-background/95 shadow-sm backdrop-blur-sm" : "bg-background/80"
+        }`}
+      >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="text-xl font-bold">ShopEase</Link>
+          <Link to="/" className="text-xl font-bold flex items-center" aria-label="ShopEase Home">
+            <span className="bg-primary rounded-full w-8 h-8 flex items-center justify-center text-white mr-2">S</span>
+            ShopEase
+          </Link>
+          
           <nav className="hidden md:flex items-center space-x-4">
             <Button
               asChild
@@ -34,39 +62,105 @@ export const Layout = ({ children }: LayoutProps) => {
               <Link to="/orders">My Orders</Link>
             </Button>
           </nav>
+
           <div className="flex items-center space-x-4">
+            {!isMobile && (
+              <form className="relative hidden md:block mr-4" onSubmit={(e) => e.preventDefault()}>
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="search"
+                  placeholder="Search..."
+                  className="w-[180px] bg-background border-border rounded-full border py-2 pl-8 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                />
+              </form>
+            )}
+            
             <CartDrawer />
-            <div className="md:hidden">
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className={isActive("/") ? "bg-accent" : ""}
-              >
-                <Link to="/">
-                  <Home className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="ghost"
-                size="icon"
-                className={isActive("/orders") ? "bg-accent" : ""}
-              >
-                <Link to="/orders">
-                  <Package className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+            
+            <button
+              className="md:hidden flex items-center justify-center"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
           </div>
         </div>
+        
+        {/* Mobile navigation menu */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 px-4 bg-background border-t">
+            <nav className="flex flex-col space-y-2">
+              <Button
+                asChild
+                variant={isActive("/") ? "default" : "ghost"}
+                className="justify-start"
+              >
+                <Link to="/" className="w-full">
+                  <Home className="mr-2 h-4 w-4" />
+                  Home
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant={isActive("/orders") ? "default" : "ghost"}
+                className="justify-start"
+              >
+                <Link to="/orders" className="w-full">
+                  <Package className="mr-2 h-4 w-4" />
+                  My Orders
+                </Link>
+              </Button>
+            </nav>
+          </div>
+        )}
       </header>
-      <main className="flex-1 container mx-auto p-4">
+
+      <main className="flex-1">
         {children}
       </main>
-      <footer className="border-t bg-gray-50 py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} ShopEase. All rights reserved.</p>
+
+      <footer className="border-t py-8 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="font-bold mb-4">ShopEase</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Shopping made simple and enjoyable with our curated collection of high-quality products.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Shop</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/" className="text-gray-500 hover:text-primary">All Products</Link></li>
+                <li><Link to="/?category=Electronics" className="text-gray-500 hover:text-primary">Electronics</Link></li>
+                <li><Link to="/?category=Clothing" className="text-gray-500 hover:text-primary">Clothing</Link></li>
+                <li><Link to="/?category=Home" className="text-gray-500 hover:text-primary">Home</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Account</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link to="/orders" className="text-gray-500 hover:text-primary">My Orders</Link></li>
+                <li><Link to="/checkout" className="text-gray-500 hover:text-primary">Checkout</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-500 hover:text-primary">Contact Us</a></li>
+                <li><a href="#" className="text-gray-500 hover:text-primary">FAQs</a></li>
+                <li><a href="#" className="text-gray-500 hover:text-primary">Shipping Information</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t mt-8 pt-6 text-center text-sm text-gray-500">
+            <p>&copy; {new Date().getFullYear()} ShopEase. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>

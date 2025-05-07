@@ -1,5 +1,7 @@
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 interface CategoryFilterProps {
   categories: string[];
@@ -14,7 +16,19 @@ export const CategoryFilter = ({
 }: CategoryFilterProps) => {
   return (
     <div className="mb-8">
-      <h2 className="mb-4 text-lg font-semibold">Categories</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Categories</h2>
+        {selectedCategory && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => onSelectCategory(null)}
+            className="text-sm"
+          >
+            Clear Filter
+          </Button>
+        )}
+      </div>
       <div className="flex flex-wrap gap-3">
         <Button
           variant={selectedCategory === null ? "default" : "outline"}
@@ -23,6 +37,9 @@ export const CategoryFilter = ({
           size="sm"
         >
           All
+          <Badge variant="outline" className="ml-2 bg-primary/10">
+            {categories.length}
+          </Badge>
         </Button>
         {categories.map((category) => (
           <Button
