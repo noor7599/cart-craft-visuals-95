@@ -13,12 +13,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
       <div className="aspect-square overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
         />
       </div>
       <CardHeader className="p-4">
@@ -31,7 +31,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <CardFooter className="p-4">
         <Button 
           onClick={() => addToCart(product)} 
-          className="w-full"
+          className="w-full transition-all duration-200 hover:bg-primary/90"
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to cart
