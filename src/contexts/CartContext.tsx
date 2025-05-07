@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/data/products";
 import { useToast } from "@/hooks/use-toast";
+import { ShoppingCart, Check, X, AlertCircle } from "lucide-react";
 
 export interface CartItem extends Product {
   quantity: number;
@@ -45,8 +46,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
         toast({
-          title: "Cart updated",
+          title: "Item quantity increased",
           description: `${product.name} quantity increased to ${existingItem.quantity + 1}`,
+          icon: <Check className="h-4 w-4 text-green-500" />,
         });
         return prevItems.map((item) =>
           item.id === product.id
@@ -55,8 +57,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       } else {
         toast({
-          title: "Added to cart",
+          title: "Item added to cart",
           description: `${product.name} added to your cart`,
+          icon: <ShoppingCart className="h-4 w-4 text-primary" />,
         });
         return [...prevItems, { ...product, quantity: 1 }];
       }
@@ -68,8 +71,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const removedItem = prevItems.find(item => item.id === productId);
       if (removedItem) {
         toast({
-          title: "Removed from cart",
+          title: "Item removed",
           description: `${removedItem.name} removed from your cart`,
+          icon: <X className="h-4 w-4 text-destructive" />,
         });
       }
       return prevItems.filter((item) => item.id !== productId);
@@ -82,11 +86,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setItems((prevItems) =>
-      prevItems.map((item) =>
+    setItems((prevItems) => {
+      const updatedItem = prevItems.find(item => item.id === productId);
+      if (updatedItem && quantity !== updatedItem.quantity) {
+        toast({
+          title: "Quantity updated",
+          description: `${updatedItem.name} quantity changed to ${quantity}`,
+          icon: <Check className="h-4 w-4 text-green-500" />,
+        });
+      }
+      return prevItems.map((item) =>
         item.id === productId ? { ...item, quantity } : item
-      )
-    );
+      );
+    });
   };
 
   const clearCart = () => {
@@ -94,6 +106,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast({
       title: "Cart cleared",
       description: "All items have been removed from your cart",
+      icon: <AlertCircle className="h-4 w-4 text-amber-500" />,
     });
   };
 
